@@ -33,10 +33,10 @@ export async function downloadUrl(url: string, path: string): Promise<void> {
 			send: timeout,
 			request: operationTimeout,	// whole operation timeout
 		},
-		agent: {
-			http: httpAgent,
-			https: httpsAgent,
-		},
+		// agent: {
+		// 	http: httpAgent,
+		// 	https: httpsAgent,
+		// },
 		http2: false,	// default
 		retry: {
 			limit: 0,
