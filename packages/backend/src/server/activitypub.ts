@@ -62,91 +62,91 @@ export function setResponseType(ctx: Router.RouterContext) {
 router.post('/inbox', json(), inbox);
 router.post('/users/:user/inbox', json(), inbox);
 
-// note
-router.get('/notes/:note', async (ctx, next) => {
-	if (!isActivityPubReq(ctx)) return await next();
+// // note
+// router.get('/notes/:note', async (ctx, next) => {
+// 	if (!isActivityPubReq(ctx)) return await next();
 
-	const note = await Notes.findOneBy({
-		id: ctx.params.note,
-		visibility: In(['public' as const, 'home' as const]),
-		localOnly: false,
-	});
+// 	const note = await Notes.findOneBy({
+// 		id: ctx.params.note,
+// 		visibility: In(['public' as const, 'home' as const]),
+// 		localOnly: false,
+// 	});
 
-	if (note == null) {
-		ctx.status = 404;
-		return;
-	}
+// 	if (note == null) {
+// 		ctx.status = 404;
+// 		return;
+// 	}
 
-	// リモートだったらリダイレクト
-	if (note.userHost != null) {
-		if (note.uri == null || isSelfHost(note.userHost)) {
-			ctx.status = 500;
-			return;
-		}
-		ctx.redirect(note.uri);
-		return;
-	}
+// 	// リモートだったらリダイレクト
+// 	if (note.userHost != null) {
+// 		if (note.uri == null || isSelfHost(note.userHost)) {
+// 			ctx.status = 500;
+// 			return;
+// 		}
+// 		ctx.redirect(note.uri);
+// 		return;
+// 	}
 
-	ctx.body = renderActivity(await renderNote(note, false));
-	ctx.set('Cache-Control', 'public, max-age=180');
-	setResponseType(ctx);
-});
+// 	ctx.body = renderActivity(await renderNote(note, false));
+// 	ctx.set('Cache-Control', 'public, max-age=180');
+// 	setResponseType(ctx);
+// });
 
-// note activity
-router.get('/notes/:note/activity', async ctx => {
-	const note = await Notes.findOneBy({
-		id: ctx.params.note,
-		userHost: IsNull(),
-		visibility: In(['public' as const, 'home' as const]),
-		localOnly: false,
-	});
+// // note activity
+// router.get('/notes/:note/activity', async ctx => {
+// 	const note = await Notes.findOneBy({
+// 		id: ctx.params.note,
+// 		userHost: IsNull(),
+// 		visibility: In(['public' as const, 'home' as const]),
+// 		localOnly: false,
+// 	});
 
-	if (note == null) {
-		ctx.status = 404;
-		return;
-	}
+// 	if (note == null) {
+// 		ctx.status = 404;
+// 		return;
+// 	}
 
-	ctx.body = renderActivity(await packActivity(note));
-	ctx.set('Cache-Control', 'public, max-age=180');
-	setResponseType(ctx);
-});
+// 	ctx.body = renderActivity(await packActivity(note));
+// 	ctx.set('Cache-Control', 'public, max-age=180');
+// 	setResponseType(ctx);
+// });
 
-// outbox
-router.get('/users/:user/outbox', Outbox);
+// // outbox
+// router.get('/users/:user/outbox', Outbox);
 
-// followers
-router.get('/users/:user/followers', Followers);
+// // followers
+// router.get('/users/:user/followers', Followers);
 
-// following
-router.get('/users/:user/following', Following);
+// // following
+// router.get('/users/:user/following', Following);
 
-// featured
-router.get('/users/:user/collections/featured', Featured);
+// // featured
+// router.get('/users/:user/collections/featured', Featured);
 
-// publickey
-router.get('/users/:user/publickey', async ctx => {
-	const userId = ctx.params.user;
+// // publickey
+// router.get('/users/:user/publickey', async ctx => {
+// 	const userId = ctx.params.user;
 
-	const user = await Users.findOneBy({
-		id: userId,
-		host: IsNull(),
-	});
+// 	const user = await Users.findOneBy({
+// 		id: userId,
+// 		host: IsNull(),
+// 	});
 
-	if (user == null) {
-		ctx.status = 404;
-		return;
-	}
+// 	if (user == null) {
+// 		ctx.status = 404;
+// 		return;
+// 	}
 
-	const keypair = await getUserKeypair(user.id);
+// 	const keypair = await getUserKeypair(user.id);
 
-	if (Users.isLocalUser(user)) {
-		ctx.body = renderActivity(renderKey(user, keypair));
-		ctx.set('Cache-Control', 'public, max-age=180');
-		setResponseType(ctx);
-	} else {
-		ctx.status = 400;
-	}
-});
+// 	if (Users.isLocalUser(user)) {
+// 		ctx.body = renderActivity(renderKey(user, keypair));
+// 		ctx.set('Cache-Control', 'public, max-age=180');
+// 		setResponseType(ctx);
+// 	} else {
+// 		ctx.status = 400;
+// 	}
+// });
 
 // user
 async function userInfo(ctx: Router.RouterContext, user: User | null) {
@@ -160,95 +160,95 @@ async function userInfo(ctx: Router.RouterContext, user: User | null) {
 	setResponseType(ctx);
 }
 
-router.get('/users/:user', async (ctx, next) => {
-	if (!isActivityPubReq(ctx)) return await next();
+// router.get('/users/:user', async (ctx, next) => {
+// 	if (!isActivityPubReq(ctx)) return await next();
 
-	const userId = ctx.params.user;
+// 	const userId = ctx.params.user;
 
-	const user = await Users.findOneBy({
-		id: userId,
-		host: IsNull(),
-		isSuspended: false,
-	});
+// 	const user = await Users.findOneBy({
+// 		id: userId,
+// 		host: IsNull(),
+// 		isSuspended: false,
+// 	});
 
-	await userInfo(ctx, user);
-});
+// 	await userInfo(ctx, user);
+// });
 
-router.get('/@:user', async (ctx, next) => {
-	if (!isActivityPubReq(ctx)) return await next();
+// router.get('/@:user', async (ctx, next) => {
+// 	if (!isActivityPubReq(ctx)) return await next();
 
-	const user = await Users.findOneBy({
-		usernameLower: ctx.params.user.toLowerCase(),
-		host: IsNull(),
-		isSuspended: false,
-	});
+// 	const user = await Users.findOneBy({
+// 		usernameLower: ctx.params.user.toLowerCase(),
+// 		host: IsNull(),
+// 		isSuspended: false,
+// 	});
 
-	await userInfo(ctx, user);
-});
-//#endregion
+// 	await userInfo(ctx, user);
+// });
+// //#endregion
 
-// emoji
-router.get('/emojis/:emoji', async ctx => {
-	const emoji = await Emojis.findOneBy({
-		host: IsNull(),
-		name: ctx.params.emoji,
-	});
+// // emoji
+// router.get('/emojis/:emoji', async ctx => {
+// 	const emoji = await Emojis.findOneBy({
+// 		host: IsNull(),
+// 		name: ctx.params.emoji,
+// 	});
 
-	if (emoji == null) {
-		ctx.status = 404;
-		return;
-	}
+// 	if (emoji == null) {
+// 		ctx.status = 404;
+// 		return;
+// 	}
 
-	ctx.body = renderActivity(await renderEmoji(emoji));
-	ctx.set('Cache-Control', 'public, max-age=180');
-	setResponseType(ctx);
-});
+// 	ctx.body = renderActivity(await renderEmoji(emoji));
+// 	ctx.set('Cache-Control', 'public, max-age=180');
+// 	setResponseType(ctx);
+// });
 
-// like
-router.get('/likes/:like', async ctx => {
-	const reaction = await NoteReactions.findOneBy({ id: ctx.params.like });
+// // like
+// router.get('/likes/:like', async ctx => {
+// 	const reaction = await NoteReactions.findOneBy({ id: ctx.params.like });
 
-	if (reaction == null) {
-		ctx.status = 404;
-		return;
-	}
+// 	if (reaction == null) {
+// 		ctx.status = 404;
+// 		return;
+// 	}
 
-	const note = await Notes.findOneBy({ id: reaction.noteId });
+// 	const note = await Notes.findOneBy({ id: reaction.noteId });
 
-	if (note == null) {
-		ctx.status = 404;
-		return;
-	}
+// 	if (note == null) {
+// 		ctx.status = 404;
+// 		return;
+// 	}
 
-	ctx.body = renderActivity(await renderLike(reaction, note));
-	ctx.set('Cache-Control', 'public, max-age=180');
-	setResponseType(ctx);
-});
+// 	ctx.body = renderActivity(await renderLike(reaction, note));
+// 	ctx.set('Cache-Control', 'public, max-age=180');
+// 	setResponseType(ctx);
+// });
 
-// follow
-router.get('/follows/:follower/:followee', async ctx => {
-	// This may be used before the follow is completed, so we do not
-	// check if the following exists.
+// // follow
+// router.get('/follows/:follower/:followee', async ctx => {
+// 	// This may be used before the follow is completed, so we do not
+// 	// check if the following exists.
 
-	const [follower, followee] = await Promise.all([
-		Users.findOneBy({
-			id: ctx.params.follower,
-			host: IsNull(),
-		}),
-		Users.findOneBy({
-			id: ctx.params.followee,
-			host: Not(IsNull()),
-		}),
-	]);
+// 	const [follower, followee] = await Promise.all([
+// 		Users.findOneBy({
+// 			id: ctx.params.follower,
+// 			host: IsNull(),
+// 		}),
+// 		Users.findOneBy({
+// 			id: ctx.params.followee,
+// 			host: Not(IsNull()),
+// 		}),
+// 	]);
 
-	if (follower == null || followee == null) {
-		ctx.status = 404;
-		return;
-	}
+// 	if (follower == null || followee == null) {
+// 		ctx.status = 404;
+// 		return;
+// 	}
 
-	ctx.body = renderActivity(renderFollow(follower, followee));
-	ctx.set('Cache-Control', 'public, max-age=180');
-	setResponseType(ctx);
-});
+// 	ctx.body = renderActivity(renderFollow(follower, followee));
+// 	ctx.set('Cache-Control', 'public, max-age=180');
+// 	setResponseType(ctx);
+// });
 
 export default router;
