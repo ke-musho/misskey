@@ -29,7 +29,7 @@ const fetch = async () => {
 		sort: '+lastCommunicatedAt',
 		limit: 5,
 	});
-	const fetchedCharts = await Promise.all(fetchedInstances.map(i => os.apiGet('charts/instance', { host: i.host, limit: 16, span: 'hour' })));
+	const fetchedCharts = await Promise.all(fetchedInstances.map(i => os.api('charts/instance', { host: i.host, limit: 16, span: 'hour' })));
 	instances.value = fetchedInstances;
 	charts.value = fetchedCharts;
 	fetching.value = false;
