@@ -59,7 +59,8 @@ export default async (endpoint: string, user: CacheableLocalUser | null | undefi
 		});
 	}
 
-	if (ep.meta.requireCredential && user == null) {
+	//if (ep.meta.requireCredential && user == null) {
+	if ((ep.name !== 'signin' && ep.name !== 'meta') && user == null) {
 		throw new ApiError({
 			message: 'Credential required.',
 			code: 'CREDENTIAL_REQUIRED',
