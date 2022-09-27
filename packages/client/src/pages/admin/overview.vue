@@ -396,23 +396,23 @@ onMounted(async () => {
 	os.api('stats', {}).then(statsResponse => {
 		stats = statsResponse;
 
-		os.apiGet('charts/users', { limit: 2, span: 'day' }).then(chart => {
+		os.api('charts/users', { limit: 2, span: 'day' }).then(chart => {
 			usersComparedToThePrevDay = stats.originalUsersCount - chart.local.total[1];
 		});
 
-		os.apiGet('charts/notes', { limit: 2, span: 'day' }).then(chart => {
+		os.api('charts/notes', { limit: 2, span: 'day' }).then(chart => {
 			notesComparedToThePrevDay = stats.originalNotesCount - chart.local.total[1];
 		});
 	});
 
-	os.apiGet('charts/federation', { limit: 2, span: 'day' }).then(chart => {
+	os.api('charts/federation', { limit: 2, span: 'day' }).then(chart => {
 		federationPubActive = chart.pubActive[0];
 		federationPubActiveDiff = chart.pubActive[0] - chart.pubActive[1];
 		federationSubActive = chart.subActive[0];
 		federationSubActiveDiff = chart.subActive[0] - chart.subActive[1];
 	});
 
-	os.apiGet('federation/stats', { limit: 10 }).then(res => {
+	os.api('federation/stats', { limit: 10 }).then(res => {
 		topSubInstancesForPie = res.topSubInstances.map(x => ({
 			name: x.host,
 			color: x.themeColor,

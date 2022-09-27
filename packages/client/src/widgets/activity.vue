@@ -68,7 +68,7 @@ const toggleView = () => {
 	save();
 };
 
-os.apiGet('charts/user/notes', {
+os.api('charts/user/notes', {
 	userId: $i.id,
 	span: 'day',
 	limit: 7 * 21,
